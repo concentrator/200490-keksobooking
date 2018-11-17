@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Дмитрий Иовлев](https://up.htmlacademy.ru/javascript/16/user/200490).
-* Наставник: `Неизвестно`.
+* Наставник: [Андрей Фидельман](https://htmlacademy.ru/profile/id773165).
 
 ---
 
