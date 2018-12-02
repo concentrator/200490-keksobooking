@@ -1,13 +1,17 @@
 'use strict';
 
 var map = document.querySelector('.map');
+var isMapActive = false;
+var mainPin = document.querySelector('.map__pin--main');
 var mapPinsBlock = document.querySelector('.map__pins');
 var mapFiltersContainer = document.querySelector('.map__filters-container');
+var adForm = document.querySelector('.ad-form');
+var addressInput = adForm.querySelector('#address');
 var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var adCardTemplate = document.querySelector('#card').content.querySelector('.map__card');
 
 var PIN_WIDTH = 50;
-// var PIN_HEIGHT = 70;
+var PIN_HEIGHT = 70;
 var MAP_WHIDTH = 1200;
 var MAP_MIN_HEIGHT = 130;
 var MAP_MAX_HEIGHT = 630;
@@ -129,7 +133,7 @@ var getAds = function (data, quantity) {
     };
 
     // Генерируем координаты с учетом ширины и высоты маркера
-    var x = getRandomIntInclusive(0, MAP_WHIDTH - PIN_WIDTH);
+    var x = getRandomIntInclusive(0, MAP_WHIDTH);
     var y = getRandomIntInclusive(MAP_MIN_HEIGHT, MAP_MAX_HEIGHT);
     var price = getRandomIntInclusive(PRICE_MIN, PRICE_MAX); // Генерируем цену
     var rooms = getRandomIntInclusive(ROOMS_MIN, ROOMS_MAX); // Генерируем кол-во комнат
@@ -160,7 +164,7 @@ var getAds = function (data, quantity) {
 var renderMapPin = function (ad) {
   // Создаем элемент метки
   var pinElement = mapPinTemplate.cloneNode(true);
-  pinElement.style = 'left: ' + ad.location.x + 'px; top: ' + ad.location.y + 'px;';
+  pinElement.style = 'left: ' + (ad.location.x - PIN_WIDTH / 2) + 'px; top: ' + (ad.location.y - PIN_HEIGHT) + 'px;';
   var pinImage = pinElement.querySelector('img');
   pinImage.src = ad.author.avatar;
   pinImage.alt = ad.offer.title;
@@ -219,10 +223,92 @@ var printMapPins = function (adsArray) {
   mapPinsBlock.appendChild(fragment);
 };
 
+var removeDisabledAttr = function (array) {
+  for (var i = 0; i < array.length; i++) {
+    array[i].removeAttribute('disabled');
+  }
+};
+
+var getElementDimensions = function (element) {
+  var dimensions = {
+    width: element.clientWidth,
+    height: element.clientHeight
+  };
+  return dimensions;
+};
+
+var getPinlLocation = function (pin) {
+  var pinDimensions = getElementDimensions(pin);
+  var pinOffset = {
+    x: pin.offsetLeft,
+    y: pin.offsetTop
+  };
+  var location = {
+    x: pinOffset.x + Math.floor(pinDimensions.width / 2),
+    y: pinOffset.y + Math.floor(pinDimensions.height)
+  };
+  if (!isMapActive && pin === mainPin) {
+    location.y = pinOffset.y + Math.floor(pinDimensions.height / 2);
+  }
+  return location;
+};
+
+var activateMap = function () {
+  var filterSelectInputs = mapFiltersContainer.querySelectorAll('select');
+  var filterFieldsets = mapFiltersContainer.querySelectorAll('fieldset');
+  var adFormFieldsets = adForm.querySelectorAll('fieldset');
+  map.classList.remove('map--faded');
+  removeDisabledAttr(filterSelectInputs);
+  adForm.classList.remove('ad-form--disabled');
+  removeDisabledAttr(filterFieldsets);
+  removeDisabledAttr(adFormFieldsets);
+  isMapActive = true;
+};
+
+var setLocationByPin = function (pin) {
+  var location = getPinlLocation(pin);
+  addressInput.value = location.x + ', ' + location.y;
+};
+
+var closeMapCard = function () {
+  var mapCard = map.querySelector('.map__card');
+  map.removeChild(mapCard);
+};
+
+var setPinClickHandler = function (pin, ad) {
+  pin.addEventListener('click', function () {
+    var mapCard = map.querySelector('.map__card');
+    if (mapCard) {
+      map.removeChild(mapCard);
+    }
+    mapCard = map.insertBefore(renderAdCard(ad), mapFiltersContainer);
+    var closeButton = mapCard.querySelector('.popup__close');
+    closeButton.addEventListener('click', closeMapCard);
+    document.addEventListener('keydown', function (evt) {
+      if (evt.keyCode === 27) {
+        closeMapCard();
+      }
+    });
+  });
+};
+
 var randomAds = getAds(sampleData, 8);
 
-map.classList.remove('map--faded');
+mainPin.addEventListener('mouseup', function () {
+  if (!isMapActive) {
+    activateMap();
+    setLocationByPin(mainPin);
+    printMapPins(randomAds);
 
-printMapPins(randomAds);
+    var pins = map.querySelectorAll('.map__pin:not\(.map__pin--main\)');
+    // console.log(pins);
 
-map.insertBefore(renderAdCard(randomAds[0]), mapFiltersContainer);
+    for (var i = 0; i < pins.length; i++) {
+      setPinClickHandler(pins[i], randomAds[i]);
+    }
+  }
+});
+
+// map.insertBefore(renderAdCard(randomAds[0]), mapFiltersContainer);
+
+setLocationByPin(mainPin);
