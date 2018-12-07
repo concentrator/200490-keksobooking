@@ -45,10 +45,22 @@ var sampleData = {
 
 // Типы жилья
 var AccomodationType = {
-  BUNGALO: 'Бунгало',
-  HOUSE: 'Дом',
-  PALACE: 'Дворец',
-  FLAT: 'Квартира'
+  BUNGALO: {
+    title: 'Бунгало',
+    minPrice: 0
+  },
+  FLAT: {
+    title: 'Квартира',
+    minPrice: 1000
+  },
+  HOUSE: {
+    title: 'Дом',
+    minPrice: 5000
+  },
+  PALACE: {
+    title: 'Дворец',
+    minPrice: 10000
+  }
 };
 
 // Случайное перемешивание массива
@@ -192,7 +204,7 @@ var renderAdCard = function (ad) {
   cardElement.querySelector('.popup__text--address').textContent = ad.offer.address;
   cardElement.querySelector('.popup__text--price').textContent = ad.offer.price + '₽/ночь';
   // Тип жилья ставим в соответствии с объектом AccomodationType
-  var propertyType = AccomodationType[ad.offer.type.toUpperCase()];
+  var propertyType = AccomodationType[ad.offer.type.toUpperCase()].title;
   cardElement.querySelector('.popup__type').textContent = propertyType;
   cardElement.querySelector('.popup__text--capacity')
   .textContent = ad.offer.rooms + ' комнаты для ' + ad.offer.guests + ' гостей';
@@ -347,25 +359,11 @@ var validateAdForm = function () {
   var checkOutSelect = adForm.querySelector('#timeout');
   var roomSelect = adForm.querySelector('#room_number');
   var capacitySelect = adForm.querySelector('#capacity');
-  // Проверка на соответствие типа жилья и цены
+  // Устанавливает цену в соответствии с типом жилья
   typeSelect.addEventListener('input', function (evt) {
     var type = evt.target.value.toString();
-    if (type === 'bungalo') {
-      priceInput.placeholder = '0';
-      priceInput.min = 0;
-    }
-    if (type === 'flat') {
-      priceInput.placeholder = '1000';
-      priceInput.min = 1000;
-    }
-    if (type === 'house') {
-      priceInput.placeholder = '5000';
-      priceInput.min = 5000;
-    }
-    if (type === 'palace') {
-      priceInput.placeholder = '10000';
-      priceInput.min = 10000;
-    }
+    priceInput.placeholder = AccomodationType[type.toUpperCase()].minPrice;
+    priceInput.min = AccomodationType[type.toUpperCase()].minPrice;
   });
 
   checkInSelect.addEventListener('input', function (evt) {
@@ -380,14 +378,15 @@ var validateAdForm = function () {
   // Проверка на соответствие количества комнат и гостей
   var roomsCapacitySync = function () {
     var rooms = parseInt(roomSelect.value, 10);
-    var fragment = document.createDocumentFragment();
+    var option;
     // Очищаем селект с гостями
     capacitySelect.innerHTML = '';
     if (rooms === 100) {
-      var option = capacityOptions.querySelector('option[value="0"]').cloneNode(true);
+      option = capacityOptions.querySelector('option[value="0"]').cloneNode(true);
       capacitySelect.appendChild(option);
     // Если комнат не 100, то количество гостей соответствует количеству комнат
     } else {
+      var fragment = document.createDocumentFragment();
       for (var i = rooms; i > 0; i--) {
         option = capacityOptions.querySelector('option[value="' + i + '"]').cloneNode(true);
         fragment.appendChild(option);
