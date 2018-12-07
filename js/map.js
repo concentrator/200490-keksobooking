@@ -149,7 +149,7 @@ var getAds = function (data, quantity) {
     var y = getRandomIntInclusive(MAP_MIN_HEIGHT, MAP_MAX_HEIGHT);
     var price = getRandomIntInclusive(PRICE_MIN, PRICE_MAX); // Генерируем цену
     var rooms = getRandomIntInclusive(ROOMS_MIN, ROOMS_MAX); // Генерируем кол-во комнат
-    var checkin = data.checkin[getRandomIntInclusive(0, data.checkin.length - 1)]; // Получаем случайных чекин
+    var checkinTime = data.checkin[getRandomIntInclusive(0, data.checkin.length - 1)]; // Получаем случайных чекин
     var guests = getRandomIntInclusive(1, rooms); // Генерируем кол-во гостей
     var photos = data.photos.slice(0); // Клонируем массив с фотками
 
@@ -161,8 +161,8 @@ var getAds = function (data, quantity) {
     ad.offer.type = getPropertyType(ad.offer.title);
     ad.offer.rooms = rooms;
     ad.offer.guests = guests;
-    ad.offer.checkin = checkin;
-    ad.offer.checkout = checkin; // Чекаут соответствует чекикну
+    ad.offer.checkin = checkinTime;
+    ad.offer.checkout = checkinTime; // Чекаут соответствует чекикну
     ad.offer.features = getFeatures(data.features);
     ad.offer.photos = shuffleArray(photos);
     ad.location.x = x;
@@ -233,9 +233,9 @@ var printMapPins = function (adsArray) {
 };
 
 // Удаляет атрибут disabled у коллекции элементов
-var removeDisabledAttr = function (array) {
-  for (var i = 0; i < array.length; i++) {
-    array[i].removeAttribute('disabled');
+var removeDisabledAttr = function (nodes) {
+  for (var i = 0; i < nodes.length; i++) {
+    nodes[i].removeAttribute('disabled');
   }
 };
 
@@ -325,7 +325,7 @@ var randomAds = getAds(sampleData, 8);
 
 // Вешаем обработчк на главную метку
 mainPin.addEventListener('mouseup', function () {
-  if (isMapActive === false) {
+  if (!isMapActive) {
     activateMap();
     setLocationByPin(mainPin);
     printMapPins(randomAds);
