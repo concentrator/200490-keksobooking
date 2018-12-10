@@ -12,7 +12,7 @@ var adCardTemplate = document.querySelector('#card').content.querySelector('.map
 
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
-var MAP_WHIDTH = 1200;
+var MAP_WIDTH = 1200;
 var MAP_MIN_HEIGHT = 130;
 var MAP_MAX_HEIGHT = 630;
 var PRICE_MIN = 1000;
@@ -157,7 +157,7 @@ var getAds = function (data, quantity) {
     };
 
     // Генерируем координаты
-    var x = getRandomIntInclusive(0, MAP_WHIDTH);
+    var x = getRandomIntInclusive(0, MAP_WIDTH);
     var y = getRandomIntInclusive(MAP_MIN_HEIGHT, MAP_MAX_HEIGHT);
     var price = getRandomIntInclusive(PRICE_MIN, PRICE_MAX); // Генерируем цену
     var rooms = getRandomIntInclusive(ROOMS_MIN, ROOMS_MAX); // Генерируем кол-во комнат
@@ -182,7 +182,6 @@ var getAds = function (data, quantity) {
 
     ads.push(ad);
   }
-  // console.log(ads);
   return ads;
 };
 
@@ -332,27 +331,7 @@ var setPinClickHandler = function (pin, ad) {
   });
 };
 
-// Получаем случайные объявления
-var randomAds = getAds(sampleData, 8);
-
-// Вешаем обработчк на главную метку
-mainPin.addEventListener('mouseup', function () {
-  if (!isMapActive) {
-    activateMap();
-    setLocationByPin(mainPin);
-    printMapPins(randomAds);
-    // Навешиваем обработчики клика на все отрисованные метки
-    var pins = map.querySelectorAll('.map__pin:not\(.map__pin--main\)');
-    for (var i = 0; i < pins.length; i++) {
-      setPinClickHandler(pins[i], randomAds[i]);
-    }
-  }
-  validateAdForm();
-});
-
-setLocationByPin(mainPin);
-
-var validateAdForm = function () {
+var addFormValidator = function () {
   var priceInput = adForm.querySelector('#price');
   var typeSelect = adForm.querySelector('#type');
   var checkInSelect = adForm.querySelector('#timein');
@@ -397,3 +376,72 @@ var validateAdForm = function () {
   roomsCapacitySync();
   roomSelect.addEventListener('input', roomsCapacitySync);
 };
+
+mainPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+
+  if (!isMapActive) {
+    // Получаем случайные объявления
+    var randomAds = getAds(sampleData, 8);
+    activateMap();
+    addFormValidator();
+    printMapPins(randomAds);
+    // Навешиваем обработчики клика на все отрисованные метки
+    var pins = map.querySelectorAll('.map__pin:not\(.map__pin--main\)');
+    for (var i = 0; i < pins.length; i++) {
+      setPinClickHandler(pins[i], randomAds[i]);
+    }
+  }
+  setLocationByPin(mainPin);
+
+  var pinDimensions = getElementDimensions(evt.target);
+  var maxCoordX = MAP_WIDTH - Math.floor(pinDimensions.width / 2);
+  var minCoordX = 0 - Math.floor(pinDimensions.width / 2);
+  var maxCoordY = MAP_MAX_HEIGHT - pinDimensions.height;
+  var minCoordY = MAP_MIN_HEIGHT - pinDimensions.height;
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+
+    var shift = {
+      x: startCoords.x - moveEvt.clientX,
+      y: startCoords.y - moveEvt.clientY
+    };
+
+    startCoords = {
+      x: moveEvt.clientX,
+      y: moveEvt.clientY
+    };
+
+    var coordX = mainPin.offsetLeft - shift.x;
+    var coordY = mainPin.offsetTop - shift.y;
+
+    if (coordX > maxCoordX || coordX < minCoordX) {
+      shift.x = 0;
+    }
+    if (coordY > maxCoordY || coordY < minCoordY) {
+      shift.y = 0;
+    }
+
+    mainPin.style.left = (mainPin.offsetLeft - shift.x) + 'px';
+    mainPin.style.top = (mainPin.offsetTop - shift.y) + 'px';
+
+    setLocationByPin(mainPin);
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
+
+setLocationByPin(mainPin);
