@@ -42,10 +42,9 @@
       }
       return index - array.length * multiplier;
     },
-    // Удаляет атрибут disabled у коллекции элементов
-    removeDisabledAttr: function (nodes) {
-      for (var i = 0; i < nodes.length; i++) {
-        nodes[i].removeAttribute('disabled');
+    runFunctionRepeatedly: function (func, arr) {
+      for (var i = 0; i < arr.length; i++) {
+        func(arr[i]);
       }
     },
     // Определяет размеры элемента
