@@ -115,8 +115,8 @@
       };
 
       // Генерируем координаты
-      var x = window.util.getRandomIntInclusive(0, window.util.MAP_WIDTH);
-      var y = window.util.getRandomIntInclusive(window.util.MAP_MIN_HEIGHT, window.util.MAP_MAX_HEIGHT);
+      var x = window.util.getRandomIntInclusive(0, window.map.MAP_WIDTH);
+      var y = window.util.getRandomIntInclusive(window.map.MAP_MIN_HEIGHT, window.map.MAP_MAX_HEIGHT);
       var price = window.util.getRandomIntInclusive(PRICE_MIN, PRICE_MAX); // Генерируем цену
       var rooms = window.util.getRandomIntInclusive(ROOMS_MIN, ROOMS_MAX); // Генерируем кол-во комнат
       var checkinTime = data.checkin[window.util.getRandomIntInclusive(0, data.checkin.length - 1)]; // Получаем случайных чекин

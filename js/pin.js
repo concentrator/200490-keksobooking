@@ -19,11 +19,31 @@
     return pinElement;
   };
 
+  // Устанавливает обработчик клика по метке
+  var addPinClickHandler = function (pin, ad) {
+    pin.addEventListener('click', function () {
+      var activePin = window.map.activePin;
+      var adCard = window.map.openedCard;
+      // Выполняется только при клике по НЕактивной метке
+      if (pin !== activePin) {
+        if (adCard) {
+          // Если другая карточка уже открыта - удаляем ее
+          window.card.closeAdCard();
+        }
+        window.card.insertAdCard(ad);
+        window.pin.setActivePin(pin);
+      }
+    });
+  };
+
   // Рисуем метки на карте из массива объявлений
   var printMapPins = function (adsArray) {
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < adsArray.length; i++) {
-      fragment.appendChild(renderMapPin(adsArray[i]));
+      var pin = renderMapPin(adsArray[i]);
+      // Навешиваем обработчики клика на все отрисованные метки
+      addPinClickHandler(pin, adsArray[i]);
+      fragment.appendChild(pin);
     }
     mapPinsBlock.appendChild(fragment);
   };

@@ -3,15 +3,8 @@
 (function () {
 
   var ESC_KEYCODE = 27;
-  var MAP_WIDTH = 1200;
-  var MAP_MIN_HEIGHT = 130;
-  var MAP_MAX_HEIGHT = 630;
 
   window.util = {
-    MAP_WIDTH: MAP_WIDTH,
-    MAP_MIN_HEIGHT: MAP_MIN_HEIGHT,
-    MAP_MAX_HEIGHT: MAP_MAX_HEIGHT,
-
     isEscEvent: function (evt, action) {
       if (evt.keyCode === ESC_KEYCODE) {
         action();

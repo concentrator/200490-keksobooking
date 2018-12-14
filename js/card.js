@@ -1,10 +1,12 @@
 'use strict';
 
 (function () {
-  // var map = document.querySelector('.map');
+  var map = document.querySelector('.map');
+  var mapFiltersContainer = document.querySelector('.map__filters-container');
   var adCardTemplate = document.querySelector('#card').content.querySelector('.map__card');
 
   window.card = {
+
     renderAdCard: function (ad) {
       // Генератор карточки объявления
       var cardElement = adCardTemplate.cloneNode(true);
@@ -42,8 +44,15 @@
       cardElement.querySelector('.popup__avatar').src = ad.author.avatar;
       return cardElement;
     },
+    insertAdCard: function (ad) {
+      var adCard = map.insertBefore(this.renderAdCard(ad), mapFiltersContainer);
+      window.map.openedCard = adCard;
+      var closeButton = adCard.querySelector('.popup__close');
+      closeButton.addEventListener('click', this.closeAdCard);
+      document.addEventListener('keydown', this.documentEscHandler);
+    },
     // Закрывает карточку объявления
-    closeMapCard: function () {
+    closeAdCard: function () {
       window.map.openedCard.remove();
       window.map.openedCard = null;
       window.map.activePin.classList.remove('map__pin--active');
@@ -51,7 +60,8 @@
       document.removeEventListener('keydown', window.card.documentEscHandler);
     },
     documentEscHandler: function (evt) {
-      window.util.isEscEvent(evt, window.card.closeMapCard);
-    },
+      window.util.isEscEvent(evt, window.card.closeAdCard);
+    }
   };
+
 })();
