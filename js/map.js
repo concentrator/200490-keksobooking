@@ -5,41 +5,36 @@
   var mainPin = document.querySelector('.map__pin--main');
   var adForm = document.querySelector('.ad-form');
   var addressInput = adForm.querySelector('#address');
+  var MAP_WIDTH = 1200;
+  var MAP_MIN_HEIGHT = 130;
+  var MAP_MAX_HEIGHT = 630;
 
   window.map = {
-    MAP_WIDTH: 1200,
-    MAP_MIN_HEIGHT: 130,
-    MAP_MAX_HEIGHT: 630,
     isMapActive: false,
     openedCard: null,
     activePin: null,
 
-    setMapNavigationArea: function () {
-      var pinDimensions = window.util.getElementDimensions(mainPin);
-      var pinArea = {
-        minCoordX: 0 - Math.floor(pinDimensions.width / 2),
-        minCoordY: this.MAP_MIN_HEIGHT - pinDimensions.height,
-        maxCoordX: this.MAP_WIDTH - Math.floor(pinDimensions.width / 2),
-        maxCoordY: this.MAP_MAX_HEIGHT - pinDimensions.height
-      };
-      return pinArea;
-    },
     // Активирует карту
     activateMap: function () {
       map.classList.remove('map--faded');
-      adForm.classList.remove('ad-form--disabled');
-      window.util.runFunctionRepeatedly(window.form.removeDisabledAttr, window.form.disabledInputs);
-      this.isMapActive = true;
-    },
-    init: function () {
-      if (!this.isMapActive) {
-        // Получаем случайные объявления
-        var randomAds = window.data.getAds(window.data.sampleData, 8);
-        this.activateMap();
-        window.form.addFormValidator();
-        window.pin.printMapPins(randomAds);
+      if (!this.mainPinInitialOffset) {
+        this.mainPinInitialOffset = window.pin.getPinOffset(mainPin);
       }
+      this.isMapActive = true;
       setLocationByPin(mainPin);
+    },
+    // Деактивирует карту
+    resetMap: function () {
+      map.classList.add('map--faded');
+      if (this.mainPinInitialOffset) {
+        window.pin.setPinOffset(mainPin, this.mainPinInitialOffset);
+      }
+      if (this.openedCard) {
+        window.card.closeAdCard();
+      }
+      window.pin.removePins();
+      setLocationByPin(mainPin);
+      this.isMapActive = false;
     }
   };
 
@@ -49,9 +44,38 @@
     addressInput.value = location.x + ', ' + location.y;
   };
 
-  var pinMoveArea = window.map.setMapNavigationArea();
+  var setMapNavigationArea = function () {
+    var pinDimensions = window.util.getElementDimensions(mainPin);
+    var pinNavArea = {
+      minCoordX: 0 - Math.floor(pinDimensions.width / 2),
+      minCoordY: MAP_MIN_HEIGHT - pinDimensions.height,
+      maxCoordX: MAP_WIDTH - Math.floor(pinDimensions.width / 2),
+      maxCoordY: MAP_MAX_HEIGHT - pinDimensions.height
+    };
+    return pinNavArea;
+  };
 
-  mainPin.addEventListener('mousedown', function (evt) {
+  var pinMoveArea = setMapNavigationArea();
+
+  var init = function () {
+    if (!window.map.isMapActive) {
+      // Получаем случайные объявления
+      // var randomAds = window.data.getAds(window.data.sampleData, 8);
+      //
+      // Загружает объявления с сервера вызывает отрисовку меток
+      window.backend.load(
+          function (response) {
+            // window.data.ads = response;
+            window.pin.printMapPins(response);
+            window.map.activateMap();
+            window.form.initAdForm();
+          }, function (error) {
+            window.util.showError(error);
+          });
+    }
+  };
+
+  var onMainPinMouseMove = function (evt) {
     evt.preventDefault();
 
     var startCoords = {
@@ -59,7 +83,7 @@
       y: evt.clientY
     };
 
-    window.map.init();
+    init();
 
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
@@ -98,7 +122,13 @@
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
-  });
+  };
 
-  setLocationByPin(mainPin);
+  window.onload = function () {
+    setLocationByPin(mainPin);
+    mainPin.addEventListener('keydown', function (evt) {
+      window.util.isEnterEvent(evt, window.map.init);
+    });
+    mainPin.addEventListener('mousedown', onMainPinMouseMove);
+  };
 })();
