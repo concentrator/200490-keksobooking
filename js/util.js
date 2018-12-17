@@ -1,10 +1,20 @@
 'use strict';
 
 (function () {
-
+  var main = document.body.querySelector('main');
+  var errorTemplate = document.querySelector('#error').content.querySelector('.error');
+  var successTemplate = document.querySelector('#success').content.querySelector('.success');
+  var errorPopup = null;
+  var successPopup = null;
+  var ENTER_KEYCODE = 13;
   var ESC_KEYCODE = 27;
 
   window.util = {
+    isEnterEvent: function (evt, action) {
+      if (evt.keyCode === ENTER_KEYCODE) {
+        action();
+      }
+    },
     isEscEvent: function (evt, action) {
       if (evt.keyCode === ESC_KEYCODE) {
         action();
@@ -47,6 +57,40 @@
         height: element.clientHeight
       };
       return dimensions;
+    },
+    showSuccess: function () {
+      if (!successPopup) {
+        successPopup = successTemplate.cloneNode(true);
+        successPopup.addEventListener('click', closeSuccess);
+      }
+      main.appendChild(successPopup);
+      document.addEventListener('keydown', successEscHandler);
+    },
+    showError: function (error) {
+      if (!errorPopup) {
+        errorPopup = errorTemplate.cloneNode(true);
+        var closeButton = errorPopup.querySelector('.error__button');
+        closeButton.addEventListener('click', closeError);
+      }
+      errorPopup.querySelector('p').textContent = error;
+      main.appendChild(errorPopup);
+      document.addEventListener('keydown', errorEscHandler);
     }
+  };
+
+  var successEscHandler = function (evt) {
+    window.util.isEscEvent(evt, closeSuccess);
+  };
+  var closeSuccess = function () {
+    successPopup.remove();
+    document.removeEventListener('keydown', successEscHandler);
+  };
+
+  var errorEscHandler = function (evt) {
+    window.util.isEscEvent(evt, closeError);
+  };
+  var closeError = function () {
+    errorPopup.remove();
+    document.removeEventListener('keydown', errorEscHandler);
   };
 })();
