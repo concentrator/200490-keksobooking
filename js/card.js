@@ -57,19 +57,19 @@
   };
 
   var cardEscHandler = function (evt) {
-    window.util.isEscEvent(evt, window.card.closeAdCard);
+    window.util.isEscEvent(evt, window.card.close);
   };
 
   window.card = {
-    insertAdCard: function (ad) {
+    insert: function (ad) {
       var adCard = map.insertBefore(renderAdCard(ad), mapFiltersContainer);
       window.map.openedCard = adCard;
       var closeButton = adCard.querySelector('.popup__close');
-      closeButton.addEventListener('click', this.closeAdCard);
+      closeButton.addEventListener('click', this.close);
       document.addEventListener('keydown', cardEscHandler);
     },
     // Закрывает карточку объявления
-    closeAdCard: function () {
+    close: function () {
       window.map.openedCard.remove();
       window.map.openedCard = null;
       window.map.activePin.classList.remove('map__pin--active');

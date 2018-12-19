@@ -28,9 +28,9 @@
       if (pin !== activePin) {
         if (adCard) {
           // Если другая карточка уже открыта - удаляем ее
-          window.card.closeAdCard();
+          window.card.close();
         }
-        window.card.insertAdCard(ad);
+        window.card.insert(ad);
         window.pin.setActivePin(pin);
       }
     });
@@ -85,7 +85,7 @@
   };
 
   var removePins = function () {
-    var mapOverlay = mapPinsBlock.querySelector('.map__overlay').cloneNode(true);
+    var mapOverlay = mapPinsBlock.querySelector('.map__overlay');
     mapPinsBlock.innerHTML = '';
     mapPinsBlock.appendChild(mapOverlay);
     mapPinsBlock.appendChild(mainPin);

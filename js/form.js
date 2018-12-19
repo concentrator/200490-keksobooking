@@ -2,6 +2,7 @@
 
 (function () {
   var mapFiltersContainer = document.querySelector('.map__filters-container');
+  var mapFilters = mapFiltersContainer.querySelector('.map__filters');
   var filterSelectInputs = mapFiltersContainer.querySelectorAll('select');
   var filterFieldsets = mapFiltersContainer.querySelectorAll('fieldset');
   var adForm = document.querySelector('.ad-form');
@@ -84,15 +85,16 @@
       evt.preventDefault();
     }
     adForm.reset();
+    mapFilters.reset();
     onTypeSelectInput();
     onRoomSelectInput();
     adForm.classList.add('ad-form--disabled');
     window.util.runFunctionRepeatedly(addDisabledAttr, disabledInputs);
-    window.map.resetMap();
+    window.map.reset();
   };
 
   window.form = {
-    initAdForm: function () {
+    init: function () {
       adForm.classList.remove('ad-form--disabled');
       window.util.runFunctionRepeatedly(removeDisabledAttr, disabledInputs);
       adForm.addEventListener('submit', onFormSubmit);
@@ -103,6 +105,7 @@
       onRoomSelectInput();
       roomSelect.addEventListener('input', onRoomSelectInput);
       resetButton.addEventListener('click', onAdFormReset);
+      window.filter.init();
     }
   };
 })();
