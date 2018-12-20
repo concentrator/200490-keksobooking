@@ -61,30 +61,16 @@
       filteredAds = window.data.ads;
 
       filteredAds = filteredAds.filter(function (it) {
-        return (housingType.value === 'any') || (it.offer.type === housingType.value);
-      });
+        return ((housingType.value === 'any') || (it.offer.type === housingType.value)) &&
+          ((it.offer.price >= priceRange[housingPrice.value].min) && (it.offer.price < priceRange[housingPrice.value].max)) &&
+          ((housingRooms.value === 'any') || (it.offer.rooms === parseInt(housingRooms.value, 10))) &&
+          ((housingGuests.value === 'any') || (it.offer.guests === parseInt(housingGuests.value, 10))) &&
+          // Сравнение массивов опций жилья объявления и выбранных опций жилья в фильтре
+          ((it.offer.features.filter(function (feature) {
+            return housingFeatures.indexOf(feature) > -1;
+          })).length >= housingFeatures.length);
+      }).slice(0, MAP_PINS_AMOUNT);
 
-      filteredAds = filteredAds.filter(function (it) {
-        return (it.offer.price >= priceRange[housingPrice.value].min &&
-        it.offer.price < priceRange[housingPrice.value].max);
-      });
-
-      filteredAds = filteredAds.filter(function (it) {
-        return (housingRooms.value === 'any') || (it.offer.rooms === parseInt(housingRooms.value, 10));
-      });
-
-      filteredAds = filteredAds.filter(function (it) {
-        return (housingGuests.value === 'any') || (it.offer.guests === parseInt(housingGuests.value, 10));
-      });
-
-      // Сравнение массивов опций жилья объявления и выбранных опций жилья в фильтре
-      filteredAds = filteredAds.filter(function (it) {
-        return (it.offer.features.filter(function (feature) {
-          return housingFeatures.indexOf(feature) > -1;
-        })).length >= housingFeatures.length;
-      });
-
-      filteredAds = filteredAds.slice(0, MAP_PINS_AMOUNT);
       window.map.clear();
       window.pin.printMapPins(filteredAds);
     }
