@@ -15,7 +15,7 @@
     activePin: null,
 
     // Активирует карту
-    activateMap: function () {
+    activate: function () {
       map.classList.remove('map--faded');
       if (!this.mainPinInitialOffset) {
         this.mainPinInitialOffset = window.pin.getPinOffset(mainPin);
@@ -23,18 +23,38 @@
       this.isMapActive = true;
       setLocationByPin(mainPin);
     },
+    clear: function () {
+      if (this.isMapActive) {
+        if (this.openedCard) {
+          window.card.close();
+        }
+        window.pin.removePins();
+      }
+    },
     // Деактивирует карту
-    resetMap: function () {
+    reset: function () {
+      this.clear();
       map.classList.add('map--faded');
       if (this.mainPinInitialOffset) {
         window.pin.setPinOffset(mainPin, this.mainPinInitialOffset);
       }
-      if (this.openedCard) {
-        window.card.closeAdCard();
-      }
-      window.pin.removePins();
       setLocationByPin(mainPin);
       this.isMapActive = false;
+    }
+  };
+
+  var init = function () {
+    if (!window.map.isMapActive) {
+      // Загружает объявления с сервера вызывает отрисовку меток
+      window.backend.load(
+          function (response) {
+            window.data.ads = response;
+            window.map.activate();
+            window.form.init();
+            window.filter.update();
+          }, function (error) {
+            window.util.showError(error);
+          });
     }
   };
 
@@ -57,25 +77,7 @@
 
   var pinMoveArea = setMapNavigationArea();
 
-  var init = function () {
-    if (!window.map.isMapActive) {
-      // Получаем случайные объявления
-      // var randomAds = window.data.getAds(window.data.sampleData, 8);
-      //
-      // Загружает объявления с сервера вызывает отрисовку меток
-      window.backend.load(
-          function (response) {
-            // window.data.ads = response;
-            window.pin.printMapPins(response);
-            window.map.activateMap();
-            window.form.initAdForm();
-          }, function (error) {
-            window.util.showError(error);
-          });
-    }
-  };
-
-  var onMainPinMouseMove = function (evt) {
+  var onMainPinMouseDown = function (evt) {
     evt.preventDefault();
 
     var startCoords = {
@@ -129,6 +131,6 @@
     mainPin.addEventListener('keydown', function (evt) {
       window.util.isEnterEvent(evt, window.map.init);
     });
-    mainPin.addEventListener('mousedown', onMainPinMouseMove);
+    mainPin.addEventListener('mousedown', onMainPinMouseDown);
   };
 })();
