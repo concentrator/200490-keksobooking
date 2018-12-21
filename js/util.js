@@ -46,9 +46,9 @@
       return index - array.length * multiplier;
     },
     runFunctionRepeatedly: function (func, arr) {
-      for (var i = 0; i < arr.length; i++) {
-        func(arr[i]);
-      }
+      arr.forEach(function (it) {
+        func(it);
+      });
     },
     // Определяет размеры элемента
     getElementDimensions: function (element) {
