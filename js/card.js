@@ -29,7 +29,7 @@
       offerProp = ad.offer[prop];
     }
     // Проверка, что для свойства есть данные
-    if (Array.isArray(offerProp) && offerProp.length > 0 || offerProp !== '') {
+    if (offerProp.length > 0 || Number.isInteger(offerProp) && offerProp !== null) {
       if (prop === 'price') {
         elem.textContent = offerProp + '₽/ночь';
       } else if (prop === 'type') {
@@ -63,7 +63,7 @@
     }
   };
 
-  var renderAdCard = function (ad) {
+  var render = function (ad) {
     // Генератор карточки объявления
     var cardElement = adCardTemplate.cloneNode(true);
     PROPS.concat(TEXT_PROPS).forEach(function (prop) {
@@ -78,7 +78,7 @@
 
   window.card = {
     insert: function (ad) {
-      var adCard = map.insertBefore(renderAdCard(ad), mapFiltersContainer);
+      var adCard = map.insertBefore(render(ad), mapFiltersContainer);
       window.map.openedCard = adCard;
       var closeButton = adCard.querySelector('.popup__close');
       closeButton.addEventListener('click', this.close);

@@ -10,7 +10,7 @@
   var MAP_MAX_HEIGHT = 630;
 
   window.map = {
-    isMapActive: false,
+    isActive: false,
     openedCard: null,
     activePin: null,
 
@@ -18,17 +18,17 @@
     activate: function () {
       map.classList.remove('map--faded');
       if (!this.mainPinInitialOffset) {
-        this.mainPinInitialOffset = window.pin.getPinOffset(mainPin);
+        this.mainPinInitialOffset = window.pin.getOffset(mainPin);
       }
-      this.isMapActive = true;
+      this.isActive = true;
       setLocationByPin(mainPin);
     },
     clear: function () {
-      if (this.isMapActive) {
+      if (this.isActive) {
         if (this.openedCard) {
           window.card.close();
         }
-        window.pin.removePins();
+        window.pin.remove();
       }
     },
     // Деактивирует карту
@@ -36,15 +36,15 @@
       this.clear();
       map.classList.add('map--faded');
       if (this.mainPinInitialOffset) {
-        window.pin.setPinOffset(mainPin, this.mainPinInitialOffset);
+        window.pin.setOffset(mainPin, this.mainPinInitialOffset);
       }
       setLocationByPin(mainPin);
-      this.isMapActive = false;
+      this.isActive = false;
     }
   };
 
   var init = function () {
-    if (!window.map.isMapActive) {
+    if (!window.map.isActive) {
       // Загружает объявления с сервера вызывает отрисовку меток
       window.backend.load(
           function (response) {
@@ -60,7 +60,7 @@
 
   // Устанавливает координаты метки в поле адреса
   var setLocationByPin = function (pin) {
-    var location = window.pin.getPinlLocation(pin);
+    var location = window.pin.getLocation(pin);
     addressInput.value = location.x + ', ' + location.y;
   };
 

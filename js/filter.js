@@ -71,7 +71,7 @@
       }).slice(0, MAP_PINS_AMOUNT);
 
       window.map.clear();
-      window.pin.printMapPins(filteredAds);
+      window.pin.print(filteredAds);
     }
   };
 })();

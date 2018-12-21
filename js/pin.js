@@ -31,27 +31,26 @@
           window.card.close();
         }
         window.card.insert(ad);
-        window.pin.setActivePin(pin);
+        window.pin.setActive(pin);
       }
     });
   };
 
   // Рисуем метки на карте из массива объявлений
-  var printMapPins = function (adsArray) {
+  var print = function (adsArray) {
     var fragment = document.createDocumentFragment();
-    for (var i = 0; i < adsArray.length; i++) {
-      if (adsArray[i].hasOwnProperty('offer')) {
-        var pin = renderMapPin(adsArray[i]);
-        // Навешиваем обработчики клика на все отрисованные метки
-        addPinClickHandler(pin, adsArray[i]);
+    adsArray.forEach(function (ad) {
+      if (ad.hasOwnProperty('offer')) {
+        var pin = renderMapPin(ad);
+        addPinClickHandler(pin, ad);
         fragment.appendChild(pin);
       }
-    }
+    });
     mapPinsBlock.appendChild(fragment);
   };
 
   // Определяет координаты отрисовки метки
-  var getPinOffset = function (pin) {
+  var getOffset = function (pin) {
     var pinOffset = {
       x: pin.offsetLeft,
       y: pin.offsetTop
@@ -59,32 +58,32 @@
     return pinOffset;
   };
 
-  var setPinOffset = function (pin, coords) {
+  var setOffset = function (pin, coords) {
     pin.style.left = coords.x + 'px';
     pin.style.top = coords.y + 'px';
   };
 
   // Определяет координаты метки
-  var getPinlLocation = function (pin) {
+  var getLocation = function (pin) {
     var pinDimensions = window.util.getElementDimensions(pin);
-    var pinOffset = getPinOffset(pin);
+    var pinOffset = getOffset(pin);
 
     var location = {
       x: pinOffset.x + Math.floor(pinDimensions.width / 2),
       y: pinOffset.y + Math.floor(pinDimensions.height)
     };
-    if (!window.map.isMapActive && pin === mainPin) {
+    if (!window.map.isActive && pin === mainPin) {
       location.y = pinOffset.y + Math.floor(pinDimensions.height / 2);
     }
     return location;
   };
 
-  var setActivePin = function (pin) {
+  var setActive = function (pin) {
     pin.classList.add('map__pin--active');
     window.map.activePin = pin;
   };
 
-  var removePins = function () {
+  var remove = function () {
     var mapOverlay = mapPinsBlock.querySelector('.map__overlay');
     mapPinsBlock.innerHTML = '';
     mapPinsBlock.appendChild(mapOverlay);
@@ -92,12 +91,12 @@
   };
 
   window.pin = {
-    printMapPins: printMapPins,
-    getPinOffset: getPinOffset,
-    setPinOffset: setPinOffset,
-    getPinlLocation: getPinlLocation,
-    setActivePin: setActivePin,
-    removePins: removePins
+    print: print,
+    getOffset: getOffset,
+    setOffset: setOffset,
+    getLocation: getLocation,
+    setActive: setActive,
+    remove: remove
   };
 
 })();
