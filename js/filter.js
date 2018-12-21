@@ -1,20 +1,20 @@
 'use strict';
 
 (function () {
-  var priceRange = {
-    any: {
+  var PriceRange = {
+    ANY: {
       min: 0,
       max: Infinity
     },
-    low: {
+    LOW: {
       min: 0,
       max: 10000
     },
-    middle: {
+    MIDDLE: {
       min: 10000,
       max: 50000
     },
-    high: {
+    HIGH: {
       min: 50000,
       max: Infinity
     }
@@ -58,13 +58,12 @@
     },
 
     update: function () {
-      filteredAds = window.data.ads;
-
-      filteredAds = filteredAds.filter(function (it) {
-        return ((housingType.value === 'any') || (it.offer.type === housingType.value)) &&
-          ((it.offer.price >= priceRange[housingPrice.value].min) && (it.offer.price < priceRange[housingPrice.value].max)) &&
-          ((housingRooms.value === 'any') || (it.offer.rooms === parseInt(housingRooms.value, 10))) &&
-          ((housingGuests.value === 'any') || (it.offer.guests === parseInt(housingGuests.value, 10))) &&
+      var price = housingPrice.value.toUpperCase();
+      filteredAds = window.data.ads.filter(function (it) {
+        return ((housingType.value === 'any') || (it.offer.type === housingType.value)) && // Тип жилья любой или выбранный
+          ((it.offer.price >= PriceRange[price].min) && (it.offer.price < PriceRange[price].max)) && // Цена в диапазоне
+          ((housingRooms.value === 'any') || (it.offer.rooms === parseInt(housingRooms.value, 10))) && // Кол-во комнат любое или выбарнное
+          ((housingGuests.value === 'any') || (it.offer.guests === parseInt(housingGuests.value, 10))) && // Кол-во гостей любое или выбранное
           // Сравнение массивов опций жилья объявления и выбранных опций жилья в фильтре
           ((it.offer.features.filter(function (feature) {
             return housingFeatures.indexOf(feature) > -1;
