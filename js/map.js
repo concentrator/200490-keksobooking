@@ -5,9 +5,32 @@
   var mainPin = document.querySelector('.map__pin--main');
   var adForm = document.querySelector('.ad-form');
   var addressInput = adForm.querySelector('#address');
-  var MAP_WIDTH = 1200;
-  var MAP_MIN_HEIGHT = 130;
-  var MAP_MAX_HEIGHT = 630;
+  var MapRect = {
+    LEFT: 0,
+    RIGHT: 1200,
+    TOP: 130,
+    BOTTOM: 630
+  };
+
+  var Coordinate = function (x, y, constraints) {
+    this.x = x;
+    this.y = y;
+    this._constraints = constraints;
+  };
+
+  Coordinate.prototype.setX = function (x) {
+    if (x >= this._constraints.left &&
+        x <= this._constraints.right) {
+      this.x = x;
+    }
+  };
+
+  Coordinate.prototype.setY = function (y) {
+    if (y >= this._constraints.top &&
+        y <= this._constraints.bottom) {
+      this.y = y;
+    }
+  };
 
   window.map = {
     isActive: false,
@@ -64,54 +87,39 @@
     addressInput.value = location.x + ', ' + location.y;
   };
 
-  var setMapNavigationArea = function () {
+  var MoveArea = function (left, top, right, bottom) {
     var pinDimensions = window.util.getElementDimensions(mainPin);
-    var pinNavArea = {
-      minCoordX: 0 - Math.floor(pinDimensions.width / 2),
-      minCoordY: MAP_MIN_HEIGHT - pinDimensions.height,
-      maxCoordX: MAP_WIDTH - Math.floor(pinDimensions.width / 2),
-      maxCoordY: MAP_MAX_HEIGHT - pinDimensions.height
-    };
-    return pinNavArea;
+    this.left = left - Math.floor(pinDimensions.width / 2);
+    this.top = top - pinDimensions.height;
+    this.right = right - Math.floor(pinDimensions.width / 2);
+    this.bottom = bottom - pinDimensions.height;
   };
 
-  var pinMoveArea = setMapNavigationArea();
+  var pinMoveArea = new MoveArea(MapRect.LEFT, MapRect.TOP, MapRect.RIGHT, MapRect.BOTTOM);
 
   var onMainPinMouseDown = function (evt) {
     evt.preventDefault();
 
-    var startCoords = {
-      x: evt.clientX,
-      y: evt.clientY
-    };
+    var startCoords = new Coordinate(evt.clientX, evt.clientY);
+    var shift = new Coordinate(startCoords.x, startCoords.y);
+    var move = new Coordinate(mainPin.offsetLeft, mainPin.offsetTop, pinMoveArea);
 
-    init();
+    init(); // Инициализация карты
 
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
 
-      var shift = {
-        x: startCoords.x - moveEvt.clientX,
-        y: startCoords.y - moveEvt.clientY
-      };
+      shift.x = startCoords.x - moveEvt.clientX;
+      shift.y = startCoords.y - moveEvt.clientY;
 
-      startCoords = {
-        x: moveEvt.clientX,
-        y: moveEvt.clientY
-      };
+      startCoords.x = moveEvt.clientX;
+      startCoords.y = moveEvt.clientY;
 
-      var coordX = mainPin.offsetLeft - shift.x;
-      var coordY = mainPin.offsetTop - shift.y;
+      move.setX(mainPin.offsetLeft - shift.x);
+      move.setY(mainPin.offsetTop - shift.y);
 
-      if (coordX > pinMoveArea.maxCoordX || coordX < pinMoveArea.minCoordX) {
-        shift.x = 0;
-      }
-      if (coordY > pinMoveArea.maxCoordY || coordY < pinMoveArea.minCoordY) {
-        shift.y = 0;
-      }
-
-      mainPin.style.left = (mainPin.offsetLeft - shift.x) + 'px';
-      mainPin.style.top = (mainPin.offsetTop - shift.y) + 'px';
+      mainPin.style.left = move.x + 'px';
+      mainPin.style.top = move.y + 'px';
 
       setLocationByPin(mainPin);
     };

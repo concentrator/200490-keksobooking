@@ -2,23 +2,41 @@
 (function () {
   var LOAD_URL = 'https://js.dump.academy/keksobooking/data';
   var SAVE_URL = 'https://js.dump.academy/keksobooking';
-  var TIMEOUT = 1000;
+  var TIMEOUT = 10000;
+  var Code = {
+    SUCCESS: 200,
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    INTERNAL_SERVER_ERROR: 500,
+    BAD_GATEWAY: 502
+  };
 
   var addXhrLoadHandler = function (xhr, onLoad, onError) {
     xhr.addEventListener('load', function () {
       var error;
       switch (xhr.status) {
-        case 200:
+        case Code.SUCCESS:
           onLoad(xhr.response);
           break;
-        case 400:
+        case Code.BAD_REQUEST:
           error = 'Неверный запрос';
           break;
-        case 401:
+        case Code.UNAUTHORIZED:
           error = 'Пользователь не авторизован';
           break;
-        case 404:
+        case Code.FORBIDDEN:
+          error = 'Доступ запрещен';
+          break;
+        case Code.NOT_FOUND:
           error = 'Ничего не найдено';
+          break;
+        case Code.INTERNAL_SERVER_ERROR:
+          error = 'Внутренняя ошибка сервера';
+          break;
+        case Code.BAD_GATEWAY:
+          error = 'Неверный ответ сервера';
           break;
 
         default:
