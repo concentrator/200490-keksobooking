@@ -51,6 +51,30 @@
     debounce(window.filter.update);
   };
 
+  var isHousingTypeMatch = function (type) {
+    return ((housingType.value === 'any') || (type === housingType.value)); // Тип жилья любой или выбранный
+  };
+
+  var isPriceRangeMatch = function (offerPrice) {
+    var price = housingPrice.value.toUpperCase();
+    return ((offerPrice >= PriceRange[price].min) && (offerPrice < PriceRange[price].max)); // Цена в диапазоне
+  };
+
+  var isRoomsNumberMatch = function (rooms) {
+    return ((housingRooms.value === 'any') || (rooms === parseInt(housingRooms.value, 10))); // Кол-во комнат любое или выбарнное
+  };
+
+  var isGuestsNumberMatch = function (guests) {
+    return ((housingGuests.value === 'any') || (guests === parseInt(housingGuests.value, 10))); // Кол-во гостей любое или выбранное
+  };
+
+  var isFeaturesSetMatch = function (features) {
+    // Сравнение массивов опций жилья объявления и выбранных опций жилья в фильтре
+    return ((features.filter(function (feature) {
+      return housingFeatures.indexOf(feature) > -1;
+    })).length >= housingFeatures.length);
+  };
+
   window.filter = {
     init: function () {
       mapFilters.addEventListener('input', onMapFiltersInput);
@@ -58,18 +82,13 @@
     },
 
     update: function () {
-      var price = housingPrice.value.toUpperCase();
       filteredAds = window.data.ads.filter(function (it) {
-        return ((housingType.value === 'any') || (it.offer.type === housingType.value)) && // Тип жилья любой или выбранный
-          ((it.offer.price >= PriceRange[price].min) && (it.offer.price < PriceRange[price].max)) && // Цена в диапазоне
-          ((housingRooms.value === 'any') || (it.offer.rooms === parseInt(housingRooms.value, 10))) && // Кол-во комнат любое или выбарнное
-          ((housingGuests.value === 'any') || (it.offer.guests === parseInt(housingGuests.value, 10))) && // Кол-во гостей любое или выбранное
-          // Сравнение массивов опций жилья объявления и выбранных опций жилья в фильтре
-          ((it.offer.features.filter(function (feature) {
-            return housingFeatures.indexOf(feature) > -1;
-          })).length >= housingFeatures.length);
+        return isHousingTypeMatch(it.offer.type) &&
+        isPriceRangeMatch(it.offer.price) &&
+        isRoomsNumberMatch(it.offer.rooms) &&
+        isGuestsNumberMatch(it.offer.guests) &&
+        isFeaturesSetMatch(it.offer.features);
       }).slice(0, MAP_PINS_AMOUNT);
-
       window.map.clear();
       window.pin.print(filteredAds);
     }

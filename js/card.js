@@ -7,14 +7,10 @@
   var PROPS = ['avatar', 'title', 'type', 'features', 'description', 'photos'];
   var TEXT_PROPS = ['address', 'price', 'capacity', 'time'];
 
-  var setProperties = function (prop, card, ad) {
+  var setProperty = function (prop, card, ad) {
     var fragment = document.createDocumentFragment();
-    var elem;
-    if (TEXT_PROPS.indexOf(prop) >= 0) {
-      elem = card.querySelector('.popup__text--' + prop);
-    } else {
-      elem = card.querySelector('.popup__' + prop);
-    }
+    var propSelector = (TEXT_PROPS.indexOf(prop) >= 0) ? '.popup__text--' + prop : '.popup__' + prop;
+    var elem = card.querySelector(propSelector);
     var offerProp = '';
     // Предварительная проверка для свойств avatar, capacity, time
     if (prop === 'avatar' && ad.author.avatar !== '') {
@@ -28,21 +24,30 @@
     } else {
       offerProp = ad.offer[prop];
     }
+
     // Проверка, что для свойства есть данные
-    if (offerProp.length > 0 || Number.isInteger(offerProp) && offerProp !== null) {
-      if (prop === 'price') {
+    if (offerProp.length === 0 || offerProp === null) {
+      elem.remove();
+      return;
+    }
+
+    switch (prop) {
+      case 'price':
         elem.textContent = offerProp + '₽/ночь';
-      } else if (prop === 'type') {
+        break;
+      case 'type':
         // Тип жилья ставим в соответствии с объектом AccomodationType
         var typeTitle = window.data.AccomodationType[ad.offer.type.toUpperCase()].title;
         elem.textContent = typeTitle;
-      } else if (prop === 'features') {
+        break;
+      case 'features':
         offerProp.forEach(function (feature) {
           fragment.appendChild(card.querySelector('.popup__feature--' + feature));
         });
         elem.innerHTML = '';
         elem.appendChild(fragment);
-      } else if (prop === 'photos') {
+        break;
+      case 'photos':
         var photoElem = elem.querySelector('img');
         // Удаляем пустую фотку
         photoElem.remove();
@@ -52,14 +57,14 @@
           fragment.appendChild(photo);
         });
         elem.appendChild(fragment);
-        // Для все остальных записываем просто текст
-      } else if (prop === 'avatar') {
+        break;
+      case 'avatar':
         elem.src = offerProp;
-      } else {
+        break;
+
+      default:
+      // Для всех остальных записываем просто текст
         elem.textContent = offerProp;
-      }
-    } else {
-      elem.remove();
     }
   };
 
@@ -67,7 +72,7 @@
     // Генератор карточки объявления
     var cardElement = adCardTemplate.cloneNode(true);
     PROPS.concat(TEXT_PROPS).forEach(function (prop) {
-      setProperties(prop, cardElement, ad);
+      setProperty(prop, cardElement, ad);
     });
     return cardElement;
   };

@@ -6,17 +6,19 @@
   var successTemplate = document.querySelector('#success').content.querySelector('.success');
   var errorPopup = null;
   var successPopup = null;
-  var ENTER_KEYCODE = 13;
-  var ESC_KEYCODE = 27;
+  var Code = {
+    ENTER: 13,
+    ESC: 27
+  };
 
   window.util = {
     isEnterEvent: function (evt, action) {
-      if (evt.keyCode === ENTER_KEYCODE) {
+      if (evt.keyCode === Code.ENTER) {
         action();
       }
     },
     isEscEvent: function (evt, action) {
-      if (evt.keyCode === ESC_KEYCODE) {
+      if (evt.keyCode === Code.ESC) {
         action();
       }
     },
